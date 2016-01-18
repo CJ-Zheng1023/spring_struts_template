@@ -53,7 +53,7 @@
 	</aop:config>
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
 	    <tx:attributes>
-	        <tx:method name="*"/>
+	        <tx:method name="*" propagation="REQUIRED" isolation="DEFAULT" read-only="false"/>
 	    </tx:attributes>
 	</tx:advice>
 
