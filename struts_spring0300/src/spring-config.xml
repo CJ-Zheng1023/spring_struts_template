@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	">
+	<bean id="zhengcj.studentAC" class="com.zhengcj.action.StudentAC" scope="prototype">
+	    <property name="studentBS" ref="zhengcj.studentBS"></property>
+	</bean>
+	<bean id="zhengcj.addStudentAC" class="com.zhengcj.action.AddStudentAC" scope="prototype">
+	    <property name="studentBS" ref="zhengcj.studentBS"></property>
+	</bean>
+	<bean id="zhengcj.studentBS" class="com.zhengcj.bizservice.impl.StudentBSImpl" scope="prototype">
+	    <property name="studentDao" ref="zhengcj.studentDAO"></property>
+	</bean>
+	<bean id="zhengcj.studentDAO" class="com.zhengcj.dao.impl.StudentDAOImpl" parent="namedParameterJdbcDaoSupport">
+	    <property name="lobHandler" ref="lobHandler"></property>
+	</bean>
+	<!--<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+	    p:location="classpath:dataBase.properties"
+	    p:fileEncoding="utf-8"></bean>
+	-->
+	<context:property-placeholder location="classpath:dataBase.properties" file-encoding="utf8"/>
+	<bean id="utf8" class="java.lang.String">
+	    <constructor-arg value="utf-8"></constructor-arg>
+	</bean>
+	<bean id="namedParameterJdbcDaoSupport" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport" abstract="true">
+	    <property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" lazy-init="true"></bean>
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+	    destroy-method="close"
+	    p:driverClassName="${driverClassName}"
+	    p:url="${url}"
+	    p:username="${username}"
+	    p:password="${password}" />
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+	    p:dataSource-ref="dataSource"/>
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" p:dataSource-ref="dataSource"></bean>
+	<aop:config proxy-target-class="true">
+	    <aop:pointcut expression="execution(* com.zhengcj.bizservice..*(..))" id="serviceMethod"/>
+	    <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod"/>
+	</aop:config>
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+	    <tx:attributes>
+	        <tx:method name="*"/>
+	    </tx:attributes>
+	</tx:advice>
+
+</beans>
